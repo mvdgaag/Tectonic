@@ -13,8 +13,9 @@ pDirectionalLight	mLight;
 
 void FrameFunc()
 {
-	double dt = Gaag.GetFrameDeltaTime();
-	mLight->SetDirection(float3(sin(dt), cos(dt), 1.0));
+	double t = Gaag.GetFrameTime();
+	//mLight->SetDirection(float3(sin(t), cos(t), 1.0));
+	mCamera->SetPosition(float3(sin(t) * 5.0, cos(t) * 5.0, 1.0));
 }
 
 

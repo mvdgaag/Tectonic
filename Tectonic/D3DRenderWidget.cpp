@@ -20,6 +20,7 @@ D3DRenderWidget::~D3DRenderWidget()
 void D3DRenderWidget::paintEvent(QPaintEvent* evt)
 {
 	Gaag.Render();
+	update(); // calls the next paint event
 }
 
 

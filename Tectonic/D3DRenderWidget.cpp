@@ -7,7 +7,6 @@ D3DRenderWidget::D3DRenderWidget(QWidget* parent) : QWidget(parent)
 	setAttribute(Qt::WA_PaintOnScreen, true);
 	setAttribute(Qt::WA_NativeWindow, true);
 
-	// Create Device
 	Gaag.Init(HWND(winId()), width(), height());
 }
 
@@ -26,5 +25,5 @@ void D3DRenderWidget::paintEvent(QPaintEvent* evt)
 
 void D3DRenderWidget::resizeEvent(QResizeEvent* evt) 
 {
-	Gaag.Init(HWND(winId()), width(), height());
+	Gaag.Resize(width(), height());
 }

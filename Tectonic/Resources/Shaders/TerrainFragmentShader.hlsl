@@ -1,4 +1,4 @@
-#include "../../../../D3D/C++/md3dframework/Shaders"
+#include "../../../../D3D/C++/md3dframework/Shaders/libhelper.hlsli"
 
 Texture2D cDiffuseTexture : register(t0);
 Texture2D cNormalTexture : register(t1);

@@ -64,5 +64,5 @@ void CS(uint3 DTid : SV_DispatchThreadID)
 	float2 meter_step = cTerrainScale.xy / cTextureInfo.xy;
 	float3 dx = float3(2.0 * meter_step.x,	0.0,				cTerrainScale.z * (east - west));
 	float3 dy = float3(0.0,					2.0 * meter_step.y,	cTerrainScale.z * (north - south));
-	rwNormal[coord] = float4(-normalize(cross(dy, dx)) * 0.5 + 0.5, 1.0);
+	rwNormal[coord] = float4(normalize(cross(dx, dy)) * 0.5 + 0.5, 1.0);
 }

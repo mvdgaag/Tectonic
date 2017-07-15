@@ -68,6 +68,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Brush.cpp" />
+    <ClCompile Include="BrushLibrary.cpp" />
     <ClCompile Include="D3DRenderWidget.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_D3DRenderWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -87,8 +89,14 @@
     <ClCompile Include="GeneratedFiles\Release\moc_Tectonic.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Layer.cpp" />
+    <ClCompile Include="LayerStack.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PaintTool.cpp" />
+    <ClCompile Include="SimpleHeightFlow.cpp" />
     <ClCompile Include="Tectonic.cpp" />
+    <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="TerrainTile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="Tectonic.h">
@@ -115,6 +123,12 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Layer.h" />
+    <ClInclude Include="LayerStack.h" />
+    <ClInclude Include="PaintTool.h" />
+    <ClInclude Include="SimpleHeightFlow.h" />
+    <ClInclude Include="Terrain.h" />
+    <ClInclude Include="TerrainTile.h" />
     <CustomBuild Include="D3DRenderWidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing D3DRenderWidget.h...</Message>
@@ -125,6 +139,8 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DWIN64 -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB  "-I.\GeneratedFiles" "-IC:\Users\Maarten\Documents\Visual Studio 2013\Projects\D3D\C++\md3dframework" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets"</Command>
     </CustomBuild>
+    <ClInclude Include="Brush.h" />
+    <ClInclude Include="BrushLibrary.h" />
     <ClInclude Include="GeneratedFiles\ui_Tectonic.h" />
   </ItemGroup>
   <ItemGroup>

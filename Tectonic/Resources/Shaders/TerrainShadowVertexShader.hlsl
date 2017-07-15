@@ -34,7 +34,7 @@ PS_INPUT VS(VS_INPUT input)
 
 	int3 pixel = int3(int2(input.TexCoord), 0);
 	float3 pos = input.Position;
-	pos.y += cTerrainScale.z * cHeightTexture.Load(pixel).x;
+	pos.z += cTerrainScale.z * cHeightTexture.Load(pixel).x;
 
 	output.Position = mul(float4(pos, 1.0), modelViewProjectionMatrix);
 

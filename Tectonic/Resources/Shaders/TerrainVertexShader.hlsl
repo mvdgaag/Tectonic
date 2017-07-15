@@ -103,10 +103,9 @@ PS_INPUT VS(VS_INPUT input)
 	int3 pixel = int3(int2(input.TexCoord), 0);
 
 	float3 pos = input.Position;
-	pos.y += cTerrainScale.z * cHeightTexture.Load(pixel).x;
+	pos.z += cTerrainScale.z * cHeightTexture.Load(pixel).x;
 
-	// in world y is up. other axis are aligned by normal calculation
-	float3 nor = cNormalTexture.Load(pixel).xzy * 2.0 - 1.0;
+	float3 nor = cNormalTexture.Load(pixel).xyz * 2.0 - 1.0;
 	output.Normal = mul(modelViewMatrix, float4(nor, 0.0)).xyz; 
 
 	output.Position = mul(modelViewProjectionMatrix, float4(pos, 1.0));

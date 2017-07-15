@@ -2,39 +2,130 @@
 #include <QtWidgets>
 #include "D3DRenderWidget.h"
 #include "Gaag.h"
+#include "Terrain.h"
+#include "SimpleHeightFlow.h"
+#include "PaintTool.h"
+#include "BrushLibrary.h"
+#include "Brush.h"
+#include "CameraController.h"
 
 
-pMesh				mMesh;
-pMaterial			mMaterial;
-pMeshObject			mMeshObject;
-pCamera				mCamera;
-pDirectionalLight	mLight;
+pDirectionalLight	gLight;
+
+pMaterial			gTerrainMaterial;
+pPixelShader		gTerrainPixelShader;
+pVertexShader		gTerrainVertexShader;
+
+pMaterial			gTerrainShadowMaterial;
+pPixelShader		gTerrainShadowPixelShader;
+pVertexShader		gTerrainShadowVertexShader;
+
+pTerrain			gTerrain;
+pSimpleHeightFlow	gFlow;
+pPaintTool			gPaintTool;
+pBrushLibrary		gBrushLibrary;
+pCameraController	gCameraController;
 
 
-void FrameFunc()
+static void FrameFunc()
 {
-	double t = Gaag.GetFrameTime();
-	//mLight->SetDirection(float3(sin(t), cos(t), 1.0));
-	mCamera->SetPosition(float3(sin(t) * 5.0, cos(t) * 5.0, 1.0));
+	double dt = Gaag.GetFrameDeltaTime();
+	gFlow->Update(dt);
+	gTerrain->ProcessDirtyLayers();
 }
 
 
-void InitModels()
+void InitContent()
 {
-	mMesh = theResourceFactory.MakeMesh();
-	mMesh->InitCube();
+	gLight = theResourceFactory.MakeDirectionalLight(float3(1, 1, -1), float4(10, 10, 10, 1), 2048);
+	Gaag.RegisterLight(gLight);
 
-	mMaterial = theResourceFactory.GetDefaultMaterial();
+	gTerrainPixelShader = theResourceFactory.LoadPixelShader("Resources/Shaders/TerrainFragmentShader.hlsl");
+	gTerrainVertexShader = theResourceFactory.LoadVertexShader("Resources/Shaders/TerrainVertexShader.hlsl");
 
-	mMeshObject = new MeshObject();
-	mMeshObject->Init(mMesh, mMaterial);
+	gTerrainMaterial = theResourceFactory.MakeMaterial();
+	gTerrainMaterial->SetDiffuseValue(float4(0.6f, 0.6f, 0.6f, 0.0f));
+	gTerrainMaterial->SetReflectivityValue(0.05f);
+	gTerrainMaterial->SetRoughnessValue(0.8f);
+	gTerrainMaterial->SetMetalicityValue(0.0f);
+	gTerrainMaterial->SetEmissivenessValue(0.0f);
+	gTerrainMaterial->SetPixelShader(gTerrainPixelShader);
+	gTerrainMaterial->SetVertexShader(gTerrainVertexShader);
 
-	mLight = theResourceFactory.MakeDirectionalLight(float3(1, 1, 1), float4(1, 1, 1, 1), 0);
+	gTerrainShadowMaterial = theResourceFactory.MakeMaterial();
+	gTerrainShadowVertexShader = theResourceFactory.LoadVertexShader("Resources/Shaders/TerrainShadowVertexShader.hlsl");
+	gTerrainShadowPixelShader = theResourceFactory.LoadPixelShader("Resources/Shaders/TerrainShadowFragmentShader.hlsl");
+	gTerrainShadowMaterial->SetVertexShader(gTerrainShadowVertexShader);
+	gTerrainShadowMaterial->SetPixelShader(gTerrainShadowPixelShader);
+	
+	gTerrain = MAKE_NEW(Terrain);
+	gTerrain->Init(int2(3), int2(64), float3(50, 50, 5), gTerrainMaterial, gTerrainShadowMaterial);
 
-	mCamera = Gaag.GetCamera();
+	gFlow = MAKE_NEW(SimpleHeightFlow);
+	gFlow->Init(gTerrain);
 
-	Gaag.RegisterObject(mMeshObject);
-	Gaag.RegisterLight(mLight);
+	gBrushLibrary = MAKE_NEW(BrushLibrary);
+	gBrushLibrary->Init();
+
+	gPaintTool = MAKE_NEW(PaintTool);
+	gPaintTool->Init(gBrushLibrary);
+
+	gPaintTool->SetTargetTerrain(gTerrain);
+	gPaintTool->SetTargetLayer(gTerrain->GetHeightLayerIndex());
+
+	if (gFlow != nullptr)
+	{
+		gPaintTool->SetTargetLayer(gFlow->GetLayerIndex());
+		gTerrain->SetHeightLayerIndex(gFlow->GetLayerIndex());
+	}
+
+	pCamera cam = Gaag.GetCamera();
+	cam->SetPosition(float3(100.0f, 100.0f, 100.0f));
+	cam->SetTarget(float3(0.0f, 0.0f, 0.0f));
+	cam->SetWorldUp(float3(0.0f, 0.0f, 1.0f));
+
+	gCameraController = MAKE_NEW(CameraController);
+	gCameraController->SetTargetCamera(cam);
+}
+
+
+void CleanUpContent()
+{
+	theResourceFactory.DestroyItem(gLight);
+
+	theResourceFactory.DestroyItem(gTerrainMaterial);
+	theResourceFactory.DestroyItem(gTerrainPixelShader);
+	theResourceFactory.DestroyItem(gTerrainVertexShader);
+
+	theResourceFactory.DestroyItem(gTerrainShadowMaterial);
+	theResourceFactory.DestroyItem(gTerrainShadowPixelShader);
+	theResourceFactory.DestroyItem(gTerrainShadowVertexShader);
+
+	if (gTerrain)
+	{
+		delete gTerrain;
+		gTerrain = nullptr;
+	}
+	if (gFlow)
+	{
+		delete gFlow;
+		gFlow = nullptr;
+	}
+	if (gPaintTool) 
+	{
+		delete gPaintTool;
+		gPaintTool = nullptr;
+	}
+	if (gBrushLibrary)
+	{
+		delete gBrushLibrary;
+		gBrushLibrary = nullptr;
+	}
+	if (gCameraController)
+	{
+		delete gCameraController;
+		gCameraController = nullptr;
+	}
 }
 
 
@@ -44,16 +135,26 @@ int main(int argc, char *argv[])
     Tectonic window;
 
 	D3DRenderWidget* render_widget = new D3DRenderWidget();
-	QPushButton* button = new QPushButton("Bla");
 	QVBoxLayout* layout = new QVBoxLayout();
 	layout->addWidget(render_widget);
-	layout->addWidget(button);
 	
-	window.centralWidget()->setLayout(layout);
+	QFrame* render_frame_widget = window.findChild<QFrame*>(QString("renderframe"), Qt::FindChildrenRecursively);
+	assert(render_frame_widget);
+	render_frame_widget->setLayout(layout);
 
-	InitModels();
+	QSplitter* splitter = window.findChild<QSplitter*>(QString("splitter"), Qt::FindChildrenRecursively);
+	assert(splitter);
+	splitter->setStretchFactor(0, 100);
+	splitter->setStretchFactor(1, 1);
+
+	InitContent();
 	Gaag.SetFrameCallback(&FrameFunc);
 
 	window.show();
+	render_widget->show();
+
+	
+	//CleanUpContent();
+
 	return application.exec();
 }
